@@ -1,0 +1,381 @@
+---
+title: "Data Mining on Human Activity Recognition"
+author: "Raein Hashemi"
+date: "December 10, 2016"
+output: pdf_document
+---
+
+### Human Activity Recognition Analysis using machine learning methods:
+
+#### Activities are recorded both in our mobile phones and smart watches via accelerometer monitoring data. These data can then be used in numerous ways to predict all kinds of health problems, bad habits and etc. Finding the exact kind of activity using the accelerometer data is a difficult task, let alone using these designated activities to identify a bad habit or possible risks. I'll be using machine learning techniques to verify these activities based on their accelerometer data and then it can be used to map new examples (predict user activities) and be analyzed further.
+
+### Background:
+
+#### Activity recognition is a significant technology in ubiquitous computing because it can be applied to many real-life, human-centric problems such as eldercare and healthcare. Ubiquitous computing (pervasive) is the growing trend towards embedding processors in everyday objects so they can monitor and pass on information. Successful research has so far focused on recognizing simple human activities.
+#### The Heterogeneity Dataset for Human Activity Recognition from Smartphone and Smartwatches is a dataset planned to benchmark human activity recognition algorithms (classification, automatic data segmentation, sensor fusion, feature extraction, etc) containing sensor heterogeneities.
+#### The files in this archive contain all the samples from the activity recognition experiment. The dataset contains the readings of two motion sensors commonly found in smartphones' recorded while users executed activities scripted in no specific order carrying smartwatches and smartphones.
+
+### Data sources:
+
+#### This is a documentation for the Heterogeneity Dataset for Human Activity Recognition (HHAR) from Smartphones and Smartwatches from the public repository:
+#### https://archive.ics.uci.edu/ml/datasets/Heterogeneity+Activity+Recognition+Data+Set
+#### or the personal Website: http://cs.au.dk/~allans/heterogenity/
+#### The data is split into 4 files in total divided by device (phone or watch) and sensor (gyroscope and accelerometer). The files for phones are: Phones_accelerometer.csv, Phones_gyroscope.csv for the accelerometer and gyroscope respectively, and for the Watch_accelerometer.csv, Watch_gyroscope.csv for the accelerometer and gyroscope as well.
+#### Activities: 'Biking', 'Sitting', 'Standing', 'Walking', 'Stair Up' and 'Stair down'.
+#### Sensors: Two embedded sensors, i.e., Accelerometer and Gyroscope sampled at the highest frequency possible by the device
+#### Devices: 4 smartwatches (2 LG watches, 2 Samsung Galaxy Gears) 8 smartphones (2 Samsung Galaxy S3 mini, 2 Samsung Galaxy S3, 2 LG Nexus 4, 2 Samsung Galaxy S+)
+#### Recordings: 9 users currently named: a,b,c,d,e,f,g,h,i consistently across all files.
+#### The data set is structured in the following way:
+
+#### ------------- Accelerometer Samples ------------
+##### All the csv files have the same structure of following columns:
+##### 'Index', 'Arrival_Time', 'Creation_Time', 'x', 'y', 'z', 'User', 'Model', 'Device', 'gt'
+##### And the columns have the following values:
+##### Index: is the row number.
+##### Arrival_Time: The time the measurement arrived to the sensing application
+##### Creation_Time: The timestamp the OS attaches to the sample
+##### X,y,z The values provided by the sensor for the three axes, X,y,z
+##### User: The user this sample originates from, the users are named a to i.
+##### Model: The phone/watch model this sample originates from
+##### Device: The specific device this sample is from. They are prefixed with the model name and then the number, e.g., nexus4_1 or nexus4_2.
+##### Gt: The activity the user was performing: bike sit, stand, walk, stairsup, stairsdown and null
+
+#### ------------- Devices and models --------------------------
+##### The names and models of the devices used in the HAR data set are:
+##### LG-Nexus 4                'nexus4_1'
+
+##### 'nexus4_2'                Saumsung Galaxy S3
+
+##### 's3_1'                    's3_2'
+
+##### Samsung Galaxy S3 min:    Samsung Galaxy S+:
+
+##### 's3mini_1'                's3mini_2'
+
+##### 'samsungold_1'            'samsungold_2'
+
+
+### Algorithms:
+
+#### In the project, I am using K-means, KNN, LDA, SVM, Naive Bayes, Random Forest, Boosting and Bagging to make the data analysis and evaluate the results with the provided labels. Then establish a predictive model to make further analysis on the activities based on raw data. I also could evaluate the algorithms on their efficiency (time and correctness).
+
+### Description:
+
+#### The MHEALTH (Mobile HEALTH) dataset comprises body motion and vital signs recordings for ten volunteers of diverse profile while performing several physical activities. Sensors placed on the subject's chest, right wrist and left ankle are used to measure the motion experienced by diverse body parts, namely, acceleration, rate of turn and magnetic field orientation. The sensor positioned on the chest also provides 2-lead ECG measurements, which can be potentially used for basic heart monitoring, checking for various arrhythmias or looking at the effects of exercise on the ECG.
+
+#### Here we import these datasets and combine them together. Then we test the accuracy of activity set labels (the 24th attribute comprising 12 different activities) generated using  popular machine learning algorithms mentioned earlier and compare their usability and effectiveness in this case. The detailed process is explained below.
+
+#### First we collect the data for each of the ten volunteers and perform normalizing, scaling and shuffling. Then we specify the training and test data. After that we start applying the algorithms and assess the results.
+
+## ####################################################
+
+#### 1) Data Prepration
+
+```{r}
+
+set.seed(1)
+
+dt1 <- read.table("./MHEALTHDATASET/mHealth_subject1.log")
+# summary(dt1)
+dim(dt1)
+
+dt2 <- read.table("./MHEALTHDATASET/mHealth_subject2.log")
+# summary(dt2)
+dim(dt2)
+
+dt3 <- read.table("./MHEALTHDATASET/mHealth_subject3.log")
+# summary(dt3)
+dim(dt3)
+
+dt4 <- read.table("./MHEALTHDATASET/mHealth_subject4.log")
+# summary(dt4)
+dim(dt4)
+
+dt5 <- read.table("./MHEALTHDATASET/mHealth_subject5.log")
+# summary(dt5)
+dim(dt5)
+
+dt6 <- read.table("./MHEALTHDATASET/mHealth_subject6.log")
+# summary(dt6)
+dim(dt6)
+
+dt7 <- read.table("./MHEALTHDATASET/mHealth_subject7.log")
+# summary(dt7)
+dim(dt7)
+
+dt8 <- read.table("./MHEALTHDATASET/mHealth_subject8.log")
+# summary(dt8)
+dim(dt8)
+
+dt9 <- read.table("./MHEALTHDATASET/mHealth_subject9.log")
+# summary(dt9)
+dim(dt9)
+
+dt10 <- read.table("./MHEALTHDATASET/mHealth_subject10.log")
+# summary(dt10)
+dim(dt10)
+
+all <- rbind(dt1,dt2,dt3,dt4,dt5,dt6,dt7,dt8,dt9,dt10)
+
+# Name the activity set field name to Y
+names(all)[24] <- "Y"
+names(all)
+
+all <- all[all$Y != 0, ]    # Remove the null values
+
+all$Y <- as.factor(all$Y)
+
+str(all)
+
+# 'all' is all the data we have. 23 attributes (column 1-23) and 1 label(column 24) with 12 classes.
+
+```
+
+## ####################################################
+
+#### 2) Normalizing and Shuffling the data:
+
+```{r}
+library('som')
+
+all_norm <- normalize(all[,-24], byrow=FALSE)
+all_norm <- as.data.frame(all_norm)
+all_norm$Y <- all$Y
+head(all_norm)
+
+# 'all_norm' is the 'all' data frame but normalized. 
+
+dt <- all_norm[sample(nrow(all_norm), nrow(all_norm)), ]
+
+# dt is the shuffled format of 'all_norm' 
+
+```
+
+## ####################################################
+
+#### 3) Scaling the data:
+
+```{r}
+
+dt <- cbind(as.data.frame(lapply(dt[,-24], scale)), Y=dt[,24])
+head(dt)
+
+# remove the previous variables:
+
+rm(dt1,dt2,dt3,dt4,dt5,dt6,dt7,dt8,dt9,dt10,all,all_norm)
+
+```
+
+## ####################################################
+
+#### 4) Specifying Training and Test data
+
+```{r}
+
+ntr <- 40000 #training
+nte <- 10000 #test
+
+train1 <- dt[1:ntr,]
+dim(train1)
+
+test1 <- dt[(ntr+1):(ntr+nte),]
+dim(test1)
+
+```
+
+## ####################################################
+
+#### 5) Applying Kmeans
+
+```{r}
+
+k <- 12
+trails <- 40
+kmean_cluster <- kmeans(rbind(train1[, -24], test1[, -24]), k, nstart=trails)
+str(kmean_cluster)
+
+head(kmean_cluster$cluster)
+
+table(pred=kmean_cluster$cluster, truth=c(train1$Y, test1$Y))
+
+agreement <- kmean_cluster$cluster == c(train1$Y, test1$Y)
+table(agreement) / 5
+
+```
+
+### 10% accurate
+
+## ####################################################
+
+#### 6) Applying KNN
+
+```{r}
+library(class)
+
+k <- 1
+
+knn.m1 <- knn(train = train1[, -24], test = test1[, -24], train1$Y, k)
+head(knn.m1)
+
+table(pred=knn.m1, truth=test1$Y)
+
+agreement <- knn.m1 == test1$Y
+table(agreement)
+
+```
+
+### 98% accurate
+
+## ####################################################
+
+#### 7) Applying LDA
+
+```{r}
+library(MASS)
+
+lda.m1 <- lda(Y ~., data=train1)
+
+lda.m1.p <- predict(lda.m1, test1[, -24])
+head(lda.m1.p$class)
+
+table(pred=lda.m1.p$class, truth=test1$Y)
+
+agreement <- lda.m1.p$class == test1$Y
+table(agreement)
+
+```
+
+### 66% accurate
+
+## ####################################################
+
+#### 8) Applying SVM
+
+```{r}
+library('e1071')
+
+svm.fit <- svm(as.factor(Y)~., data=train1, kernal="radial", cost=10, scale=TRUE)
+head(svm.fit$index) #lists the support vectors
+
+summary(svm.fit)
+
+ypred <- predict(svm.fit, test1[, -24])
+head(ypred)
+
+table(pred=ypred, truth=test1$Y)
+
+agreement <- ypred == test1$Y
+table(agreement)
+
+```
+
+### 98% accurate
+
+## ####################################################
+
+#### 9) Applying Naive Bayes Method
+
+```{r}
+
+model1 <- naiveBayes(Y~., data=train1)
+ypred_naivbs1 <- predict(model1, test1[,-24])
+
+table(pred=ypred_naivbs1, truth=test1$Y)
+
+agreement <- ypred_naivbs1 == test1$Y
+table(agreement)
+
+```
+
+### 84% accurate
+
+## ####################################################
+
+#### 10) Applying Random Forest
+
+```{r}
+library(randomForest)
+
+fit <- randomForest(Y~., data=train1, importance=TRUE, ntree=200)
+ypred_rf1 <- predict(fit, test1[, -24])
+head(ypred_rf1)
+
+table(pred=ypred_rf1, truth=test1$Y)
+
+agreement <- ypred_rf1 == test1$Y
+table(agreement)
+
+```
+
+### 99% accurate
+
+## ####################################################
+
+#### 11) Applying Bagging method
+
+```{r}
+library(ipred)
+
+fit1 <- bagging(Y~., data=train1)
+ypred_bg1 <- predict(fit1, test1[, -24], type="class")
+head(ypred_bg1)
+
+ypred_bg1 <- factor(ypred_bg1, levels = c(1,2,3,4,5,6,7,8,9,10,11,12))
+
+table(pred=ypred_bg1, truth=test1$Y)
+
+agreement <- ypred_bg1 == test1$Y
+table(agreement)
+
+```
+
+### 96% accurate
+
+## ####################################################
+
+#### 12) Applying Boosting method
+
+```{r}
+library(adabag)
+
+model1 <- boosting(Y~., data=train1, boos = FALSE, mfinal = 10)
+ypred_boost1 <- predict(model1, test1[, -24])
+
+table(pred=as.integer(ypred_boost1$class), truth=test1$Y)
+
+agreement <- ypred_boost1$class == test1$Y
+table(agreement)
+
+```
+
+### 78% accurate
+
+## ####################################################
+
+### Interpretation:
+
+#### In supervised learning, one set of observations, called inputs, is assumed to be the cause of another set of observations, called outputs, while in unsupervised learning all observations are assumed to be caused by a set of latent variables. Therefore, as we saw in the results for Kmeans, unsupervied learning is not efficient for this kind of prediction.
+
+#### The standard implementation of the LDA model assumes a Gaussian distribution of the input variables. Also we have to Consider removing outliers from our data. These can reorient the basic statistics used to separate classes in LDA such as the mean and the standard deviation. LDA also assumes that each input variable has the same variance. It is almost always a good idea to standardize our data before using LDA so that it has a mean of 0 and a standard deviation of 1. Some of these or maybe all of them could be the reasons for the less efficient performance of LDA in our case.
+
+#### Naive Base has the strong assumption of independency between the features. This in fact is not exactly true and even not so close. The reason is that some sensors' values impose some change in the other sensors and this will be against independency of attributes. Therefore we will expect a lower accuracy in the performance of the classifier. The results indicate that we have only 84% accuracy in the test set as opposed to 98% accuracy of KNN and SVM.
+
+#### Baysian classifier could be very useful in problems with almost independent features or problems with many features that with other sort of conventional classifiers, The problem would be very time consuming and computationally expensive like spam recgnition for emails.
+
+### Best algorithms in order: Random Forest, KNN, SVM, Bagging, Boosting
+
+#### KNN tends to perform very well with a lot of data points. On the minus side KNN needs to be carefully tuned, the choice of K and the metric (distance) to be used are critical. KNN is also sensitive to outliers and removing them before using KNN tends to improve results. The data I used was pretty clean, so it made KNN's outcome as good as SVM's.
+
+#### When you have a limited set of points in many dimensions, SVM tends to be very efficient because it should be able to find the linear separation that exists. SVM is good with outliers as it will only use the most relevant points to find a linear separation (support vectors). SVM also needs to be tuned, the cost and the use of a kernel and its parameters are critical to the algorithm. In the data we used, there were both many data points and many dimensions, therefore easing the prediction for both KNN and SVM.
+
+#### Bagging and Boosting do a very good job on classifying the activities based on the sensor data. In fact after Random Forest, KNN and SVM, Bagging and Boosting were the most successful classifiers in my dataset.
+
+#### Random Forest can very well handle high dimensional spaces as well as large number of training examples. It also deals really well with uneven data sets that have missing variables. Another advantage of these algorithms is that you don't have to worry about tuning a bunch of parameters like you do with SVMs, so they seem to be quite popular these days. It's constructed using bagging or boosting, so all the more reason to beat all the other algorithms here.
+
+
+### References:
+
+#### 1) UCI Machine Learning Repository:
+#### https://archive.ics.uci.edu/ml/datasets/Heterogeneity+Activity+Recognition
+
+#### 2) A. Stisen, H. Blunck, S. Bhattacharya, T. Prentow, M. Kjærgaard, A. Dey, T. Sonne, M. Møller Jensen, "Smart Devices are Different: Assessing and Mitigating Mobile Sensing Heterogeneities for Activity Recognition", Proc. 13th ACM Conference on Embedded Networked Sensor Systems (SenSys), Seoul, Korea, 2015
